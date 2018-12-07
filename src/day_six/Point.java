@@ -3,9 +3,9 @@ package day_six;
 import java.util.List;
 
 public class Point {
-    long x;
-    long y;
-    String id;
+    private long x;
+    private long y;
+    private String id;
 
     public Point(final long x, final long y, final String id) {
         this.x = x;
@@ -18,7 +18,10 @@ public class Point {
     }
 
     public static Point getPointAvg(final List<Point> points) {
-        return points.stream().reduce(new Point(), Point::add);
+        final Point point = points.stream().reduce(new Point(), Point::add);
+        point.x /= points.size();
+        point.y /= points.size();
+        return point;
     }
 
     public static String calcNearestPoint(final Point point, final List<Point> points) {
@@ -36,7 +39,7 @@ public class Point {
     }
 
     private static long calcDist(final Point point1, final Point point2) {
-        return Math.abs(point1.getX() - point2.getX()) + Math.abs(point1.getY() - point2.getY());
+        return Math.abs(point1.x - point2.x) + Math.abs(point1.y - point2.y);
     }
 
     public static Point add(final Point point1, final Point point2) {
