@@ -31,7 +31,6 @@ public class PointCalculator extends Thread {
     public void run() {
         int i = 0;
         for (long max = maxStart; max < maxEnd; max++) {
-
             for (long j = -max + startX; j < max + startY; j++) {
                 Point point;
                 switch (i) {

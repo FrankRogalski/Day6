@@ -36,7 +36,7 @@ public class Main {
             for (final String key: pointCalculator.getPointValues().keySet())
                 pointValues.put(key, pointValues.getOrDefault(key, 0L) + pointCalculator.getPointValues().get(key));
 
-        final long erg = pointValues.values().stream().reduce(0L, (identity, number) -> identity > number ? identity : number);
+        final long erg = pointValues.values().stream().reduce(0L, Math::max);
         logger.info(String.valueOf(erg));
     }
 

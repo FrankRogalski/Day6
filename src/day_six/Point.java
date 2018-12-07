@@ -28,7 +28,7 @@ public class Point {
         long min = Long.MAX_VALUE;
         String pointName = "";
         for (final Point listPoint : points) {
-            final Long dist = calcDist(point, listPoint);
+            final long dist = calcDist(point, listPoint);
             if (dist < min) {
                 min = dist;
                 pointName = listPoint.getId();
