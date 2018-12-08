@@ -11,8 +11,8 @@ public class PointCalculator extends Thread {
     private final long startY;
     private final long maxStart;
     private final long maxEnd;
-    private final Map<String, Long> pointValues;
-    private final Map<String, Long> edgePoints;
+    private final Map<Long, Long> pointValues;
+    private final Map<Long, Long> edgePoints;
     private final Logger logger;
 
     public PointCalculator(final List<Point> startingPoints, final long startX, final long startY, long maxStart, long maxEnd, final Logger logger) {
@@ -30,39 +30,42 @@ public class PointCalculator extends Thread {
     @Override
     public void run() {
         int i = 0;
-        for (long max = maxStart; max < maxEnd; max++) {
-            for (long j = -max + startX; j < max + startY; j++) {
+        for (long max = maxStart; true; max++) {
+            for (long j = -max; j < max; j++) {
                 Point point;
                 switch (i) {
                     case 0:
-                        point = new Point(j, -max, "P");
+                        point = new Point(j + startX, -max + startY, -1);
                         break;
                     case 1:
-                        point = new Point(max, j, "P");
+                        point = new Point(max + startX, j + startY, -1);
                         break;
                     case 2:
-                        point = new Point(j, max, "P");
+                        point = new Point(j + startX, max + startY, -1);
                         break;
                     default:
-                        point = new Point(-max, j, "P");
+                        point = new Point(-max + startX, j + startY, -1);
                 }
-                final String key = Point.calcNearestPoint(point, startingPoints);
+                final long key = Point.calcNearestPoint(point, startingPoints);
                 pointValues.put(key, pointValues.getOrDefault(key, 0L) + 1);
                 edgePoints.put(key, edgePoints.getOrDefault(key, 0L) + 1);
             }
 
+            if (max % 100 == 0)
+                logger.info(String.valueOf(max));
             if (++i % 4 == 0) {
-                if (max + 1 >= maxEnd)
-                    edgePoints.entrySet().removeIf( entry -> entry.getKey().equals("") || edgePoints.containsKey(entry.getKey()));
-                if (max % 100 == 0)
-                    logger.info(String.valueOf(max));
+                if (max >= maxEnd) {
+                    pointValues.entrySet()
+                            .removeIf( entry -> edgePoints.containsKey(entry.getKey()) || entry.getKey() == -1);
+                    break;
+                }
                 edgePoints.clear();
                 i = 0;
             }
         }
     }
 
-    public Map<String, Long> getPointValues() {
+    public Map<Long, Long> getPointValues() {
         return pointValues;
     }
 }

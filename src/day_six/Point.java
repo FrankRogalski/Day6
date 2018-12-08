@@ -5,37 +5,38 @@ import java.util.List;
 public class Point {
     private long x;
     private long y;
-    private String id;
+    private long id;
 
-    public Point(final long x, final long y, final String id) {
+    public Point(final long x, final long y, final long id) {
         this.x = x;
         this.y = y;
         this.id = id;
     }
 
     public Point() {
-
+        //no code needed because of method getPointAvg
     }
 
     public static Point getPointAvg(final List<Point> points) {
-        final Point point = points.stream().reduce(new Point(), Point::add);
+        final Point point = points.stream()
+                .reduce(new Point(), Point::add);
         point.x /= points.size();
         point.y /= points.size();
         return point;
     }
 
-    public static String calcNearestPoint(final Point point, final List<Point> points) {
+    public static long calcNearestPoint(final Point point, final List<Point> points) {
         long min = Long.MAX_VALUE;
-        String pointName = "";
+        long pointId = -1;
         for (final Point listPoint : points) {
             final long dist = calcDist(point, listPoint);
             if (dist < min) {
                 min = dist;
-                pointName = listPoint.getId();
+                pointId = listPoint.getId();
             } else if (dist == min)
-                return "";
+                return -1;
         }
-        return pointName;
+        return pointId;
     }
 
     private static long calcDist(final Point point1, final Point point2) {
@@ -46,11 +47,11 @@ public class Point {
         return new Point(point1.x + point2.x, point1.y + point2.y, point1.id);
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
