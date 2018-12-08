@@ -15,6 +15,15 @@ public class PointCalculator extends Thread {
     private final Map<Long, Long> edgePoints;
     private final Logger logger;
 
+    /**
+     * Constructor used to submit values to the threads
+     * @param startingPoints The points to which the distance should be calculated
+     * @param startX The x offset of the middle of the points
+     * @param startY The y offset of the middle of the points
+     * @param maxStart The start of the range that should be checked
+     * @param maxEnd The end of the range that should be checked
+     * @param logger A logger to print out useful information
+     */
     public PointCalculator(final List<Point> startingPoints, final long startX, final long startY, long maxStart, long maxEnd, final Logger logger) {
         this.startingPoints = startingPoints;
         this.startX = startX;
@@ -27,13 +36,19 @@ public class PointCalculator extends Thread {
         edgePoints = new HashMap<>();
     }
 
+    /**
+     * The execution of the thread in which the value of each point in the assigned thread is calculated and summed up
+     */
     @Override
     public void run() {
-        int i = 0;
+        // Go through all assigned max values
         for (long max = maxStart; true; max++) {
+            final int wall = (int)(max % 4);
+            // Go through each point of one side of the spiral
             for (long j = -max; j < max; j++) {
                 Point point;
-                switch (i) {
+                // based on the side of the spiral create a point
+                switch (wall) {
                     case 0:
                         point = new Point(j + startX, -max + startY, -1);
                         break;
@@ -46,23 +61,26 @@ public class PointCalculator extends Thread {
                     default:
                         point = new Point(-max + startX, j + startY, -1);
                 }
+                // Calculate the closest starting point to the just created point
+                // and increase the counter for the key of that starting point
                 final long key = Point.calcNearestPoint(point, startingPoints);
                 pointValues.put(key, pointValues.getOrDefault(key, 0L) + 1);
                 edgePoints.put(key, edgePoints.getOrDefault(key, 0L) + 1);
             }
 
-            if (max % 100 == 0)
-                logger.info(String.valueOf(max));
-            if (++i % 4 == 0) {
-                if (max >= maxEnd) {
-                    pointValues.entrySet()
-                            .removeIf( entry -> edgePoints.containsKey(entry.getKey()) || entry.getKey() == -1);
+            // Check if the calculation is finished an reset the edge values
+            if (wall == 0) {
+                if (max % 100 == 0)
+                    logger.info(String.valueOf(max));
+                if (max >= maxEnd)
                     break;
-                }
                 edgePoints.clear();
-                i = 0;
             }
         }
+    }
+
+    public Map<Long, Long> getEdgePoints() {
+        return edgePoints;
     }
 
     public Map<Long, Long> getPointValues() {
