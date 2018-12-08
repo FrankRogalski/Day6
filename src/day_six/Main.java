@@ -22,21 +22,18 @@ public class Main {
             throw new IllegalArgumentException("All Three arguments are needed");
         final long threads = Long.parseLong(args[1]);
         final long maxValue = Long.parseLong(args[0]);
-        if (maxValue % threads != 0)
-            throw new IllegalArgumentException("Maxvalue must be cleanly divisible by the number of threads");
 
 
         final List<Point> points = getPoints(args[2]);
         final Point avg = Point.getPointAvg(points);
-        final long threadSum = maxValue / threads;
-        final List<PointCalculator> pointCalculators = new LinkedList<>();
+        final double threadSum = (double)maxValue / threads;
+        final LinkedList<PointCalculator> pointCalculators = new LinkedList<>();
         long oldEnd = -1;
 
         for (int i = 0; i < threads; i++) {
             // Calculate the Area each thread should work on
             final long start = oldEnd + 1;
-            long end = maxValue - (maxValue - (i * threadSum + threadSum));
-            end = 4 * (end / 4) - 1;
+            final long end = maxValue - (long)(maxValue - (i * threadSum + threadSum));
             oldEnd = end;
 
             // Initialize and start the threads
@@ -61,12 +58,12 @@ public class Main {
                 pointValues.put(key, pointValues.getOrDefault(key, 0L) + pointCalculator.getPointValues().get(key));
 
         // Remove all keys which areas touch the edge
-        Map<Long, Long> edgePoints = ((LinkedList<PointCalculator>) pointCalculators).getLast().getEdgePoints();
+        Map<Long, Long> edgePoints = pointCalculators.getLast().getEdgePoints();
         pointValues.entrySet().removeIf(entry -> edgePoints.containsKey(entry.getKey()) || entry.getKey() == -1);
 
         // Find the entry with the largest area and print it
         final long erg = pointValues.values().stream().reduce(0L, Math::max);
-        logger.info(String.valueOf(erg));
+        logger.info(String.format("result: %s", erg));
     }
 
     /**

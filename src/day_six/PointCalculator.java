@@ -9,8 +9,8 @@ public class PointCalculator extends Thread {
     private final List<Point> startingPoints;
     private final long startX;
     private final long startY;
-    private final long maxStart;
-    private final long maxEnd;
+    private final long startSpiral;
+    private final long endSpiral;
     private final Map<Long, Long> pointValues;
     private final Map<Long, Long> edgePoints;
     private final Logger logger;
@@ -20,16 +20,16 @@ public class PointCalculator extends Thread {
      * @param startingPoints The points to which the distance should be calculated
      * @param startX The x offset of the middle of the points
      * @param startY The y offset of the middle of the points
-     * @param maxStart The start of the range that should be checked
-     * @param maxEnd The end of the range that should be checked
+     * @param startSpiral The start of the range that should be checked
+     * @param endSpiral The end of the range that should be checked
      * @param logger A logger to print out useful information
      */
-    public PointCalculator(final List<Point> startingPoints, final long startX, final long startY, long maxStart, long maxEnd, final Logger logger) {
+    public PointCalculator(final List<Point> startingPoints, final long startX, final long startY, long startSpiral, long endSpiral, final Logger logger) {
         this.startingPoints = startingPoints;
         this.startX = startX;
         this.startY = startY;
-        this.maxStart = maxStart;
-        this.maxEnd = maxEnd;
+        this.startSpiral = startSpiral;
+        this.endSpiral = endSpiral;
         this.logger = logger;
 
         pointValues = new HashMap<>();
@@ -41,8 +41,9 @@ public class PointCalculator extends Thread {
      */
     @Override
     public void run() {
+        final long end = endSpiral * 4 - 1;
         // Go through all assigned max values
-        for (long max = maxStart; true; max++) {
+        for (long max = startSpiral * 4; true; max++) {
             final int wall = (int)(max % 4);
             // Go through each point of one side of the spiral
             for (long j = -max; j < max; j++) {
@@ -68,12 +69,14 @@ public class PointCalculator extends Thread {
                 edgePoints.put(key, edgePoints.getOrDefault(key, 0L) + 1);
             }
 
-            // Check if the calculation is finished an reset the edge values
+            // Check if the calculation is finished
+            if (max >= end)
+                break;
+
+            // Reset the edge values
             if (wall == 0) {
-                if (max % 100 == 0)
-                    logger.info(String.valueOf(max));
-                if (max >= maxEnd)
-                    break;
+                if (max % 400 == 0)
+                    logger.info(String.valueOf(max / 4));
                 edgePoints.clear();
             }
         }
